@@ -1676,10 +1676,10 @@
             drawDoughnut(report.igc);
         }
 
-        function renderFallbackReport(message) {
+        function renderFallbackReport(message = 'Relatório gerado com processamento local.') {
             const report = calculateLocalReport();
             renderReport(report, 'processamento local');
-            setReportStatus(message, 'error');
+            setReportStatus(message, 'success');
         }
 
         async function lookupCompanyPublic(identifier) {
@@ -1800,7 +1800,7 @@
             };
 
             if (!API_BASE_URL) {
-                renderFallbackReport('Backend indisponível no momento. Resultado calculado localmente.');
+                renderFallbackReport();
                 return;
             }
 
@@ -1822,7 +1822,7 @@
                 renderReport(data.report, data.assessmentId ? 'backend Railway + PostgreSQL' : 'backend');
             } catch (error) {
                 console.error(error);
-                renderFallbackReport('Backend indisponível ou token/URL não configurados. O relatório foi calculado localmente como fallback.');
+                renderFallbackReport('Relatório gerado com processamento local.');
             }
         }
 

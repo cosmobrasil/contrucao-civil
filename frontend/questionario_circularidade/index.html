@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment de Economia Circular</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617; /* Obsidian */
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --gold: #D4AF37;
+            --gold-hover: #b3922d;
+            --blue: #3B82F6;
+            --blue-hover: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Geist', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 768px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .app-logo {
+            width: 56px;
+            height: 56px;
+            flex: 0 0 56px;
+            object-fit: contain;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 0.35rem;
+        }
+
+        .app-header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .app-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .app-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .company-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .field-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .field-group input {
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.7rem;
+            padding: 0.95rem 1rem;
+            color: var(--text-primary);
+            font: inherit;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .field-group input:focus {
+            border-color: rgba(212, 175, 55, 0.55);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .field-group input::placeholder {
+            color: rgba(148, 163, 184, 0.65);
+        }
+
+        .field-group input[readonly] {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .field-full {
+            grid-column: 1 / -1;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .status-message {
+            min-height: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-message.error {
+            color: #fca5a5;
+        }
+
+        .status-message.success {
+            color: #86efac;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            display: none; /* hidden on intro/outro */
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--gold));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-align: right;
+            font-weight: 500;
+            display: none;
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.4s ease;
+            flex: 1;
+        }
+
+        .step.active {
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .step-header {
+            margin-bottom: 2rem;
+        }
+
+        .step-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.3;
+            margin: 0 0 1rem 0;
+        }
+
+        .step-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Options */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: auto;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Actions */
+        .btn-primary {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-hover);
+            transform: translateY(-2px);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+            .glass-panel {
+                padding: 2rem;
+                border-radius: 1rem;
+            }
+            .app-header {
+                gap: 0.75rem;
+                margin-bottom: 1.25rem;
+            }
+            .app-logo {
+                width: 48px;
+                height: 48px;
+                flex-basis: 48px;
+            }
+            .company-grid {
+                grid-template-columns: 1fr;
+            }
+            .step-title {
+                font-size: 1.25rem;
+            }
+            .report-grid,
+            .report-sections,
+            .stage-list {
+                grid-template-columns: 1fr;
+            }
+            .report-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Terms Box */
+        .terms-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            max-height: 220px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .terms-box h3 {
+            color: var(--gold);
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .terms-box h4 {
+            color: var(--text-primary);
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .terms-box p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input {
+            margin-top: 0.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--gold);
+            cursor: pointer;
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Report */
+        .report-shell {
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .report-shell.visible {
+            display: block;
+        }
+
+        .report-banner {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .report-kicker {
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 0.72rem;
+            color: var(--gold);
+            font-weight: 700;
+            margin: 0 0 0.4rem 0;
+        }
+
+        .report-title {
+            margin: 0;
+            font-size: 1.55rem;
+            line-height: 1.2;
+        }
+
+        .report-subtitle {
+            margin: 0.45rem 0 0 0;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .report-status {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .report-status.error {
+            color: #fca5a5;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .report-card {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        .report-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+        }
+
+        .report-chart-label {
+            margin-top: 0.95rem;
+            text-align: center;
+        }
+
+        .report-chart-label strong {
+            display: block;
+            font-size: 1.35rem;
+            color: var(--text-primary);
+        }
+
+        .report-chart-label span {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .report-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.85rem;
+            padding: 1rem;
+        }
+
+        .metric-card .label {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .metric-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .metric-card .hint {
+            margin-top: 0.35rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .report-sections {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-section h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .report-section ul {
+            margin: 0;
+            padding-left: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .stage-list {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .stage-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.85rem;
+            padding: 0.9rem;
+        }
+
+        .stage-item .stage-name {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .stage-item .stage-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .stage-item .stage-meta {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+        }
+
+        .report-footer-note {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            .report-grid,
+            .report-sections,
+            .stage-list,
+            .report-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="glass-panel">
+            <div class="app-header">
+                <img class="app-logo" src="cosmob pequeno.png" alt="Logo Cosmob">
+                <div class="app-header-text">
+                    <div class="app-brand">CosmoBrasil 2.0</div>
+                    <div class="app-subtitle">Pré-Diagnóstico de Circularidade de Produtos</div>
+                </div>
+            </div>
+            
+            <div class="progress-text" id="progress-text">Questão 1 de 12</div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <!-- Intro -->
+            <div class="step active" id="step-0">
+                <div class="step-header">
+                    <span class="step-tag">CosmoBrasil 2.0</span>
+                    <h1 class="step-title" style="font-size: 2rem; margin-bottom: 0.25rem;">Pré-Diagnóstico de Circularidade 2026</h1>
+                    <h2 style="font-size: 1.1rem; color: var(--gold); margin-bottom: 1rem; font-weight: 500;">Pré-Diagnóstico sobre Circularidade de Produtos 2.0 - 2026</h2>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">📋 1 Cadastro + 12 Questões • 🎯 4 Categorias • ⏱️ 10-15 min</p>
+
+                    <div class="terms-box">
+                        <h3>TERMOS DE USO</h3>
+                        
+                        <h4>1. Limitações Legais</h4>
+                        <p>Este pré-diagnóstico não possui valor legal e não pode ser utilizado como ferramenta de certificação formal. Os resultados não constituem certificação oficial nem garantem conformidade com regulamentações específicas.</p>
+                        
+                        <h4>2. Finalidade</h4>
+                        <p>A finalidade é orientar as empresas na identificação de possíveis melhorias em seus processos de produção e práticas empresariais, fornecendo insights para desenvolvimento sustentável.</p>
+                        
+                        <h4>3. Base Metodológica</h4>
+                        <p>O objetivo principal do pré-diagnóstico é medir o grau de circularidade de um produto, com base em indicadores internacionais. A fonte dos indicadores internacionais pertence ao Centro Tecnológico Cosmob localizado na Itália.</p>
+                        
+                        <h4>Privacidade dos Dados</h4>
+                        <ul style="padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                            <li>Os dados fornecidos são tratados com confidencialidade</li>
+                            <li>Informações da empresa não são compartilhadas individualmente</li>
+                            <li>Apenas dados agregados e anônimos são utilizados em análises</li>
+                            <li>Você pode solicitar a exclusão dos seus dados a qualquer momento</li>
+                        </ul>
+                        
+                        <h4>Responsabilidades</h4>
+                        <p>CosmoBrasil não se responsabiliza por decisões tomadas. O usuário deve validar as informações com especialistas.</p>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="acceptTerms" onchange="document.getElementById('startBtn').disabled = !this.checked">
+                        <label for="acceptTerms" style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.4; cursor: pointer;">
+                            <strong style="color: var(--gold);">Declaração de Aceite:</strong> Declaro que li, compreendi e aceito todos os termos de uso acima descritos. Ao marcar esta opção, confirmo que entendo as limitações deste diagnóstico e que os resultados serão utilizados apenas para orientação interna da empresa.
+                        </label>
+                    </div>
+                </div>
+                <button class="btn-primary" id="startBtn" onclick="nextStep(1)" disabled>Iniciar Avaliação</button>
+            </div>
+
+            <!-- Company Registration -->
+            <div class="step" id="step-1">
+                <div class="step-header">
+                    <span class="step-tag">Cadastro da Empresa</span>
+                    <h2 class="step-title">Informe a empresa que será avaliada</h2>
+                    <p class="step-desc">Use a API da empresaqui para preencher automaticamente os dados básicos da empresa antes de iniciar o questionário.</p>
+                </div>
+
+                <div class="company-form">
+                    <div class="field-group field-full">
+                        <label for="companyIdentifier">CNPJ ou identificador da empresa</label>
+                        <input id="companyIdentifier" type="text" placeholder="Digite o CNPJ ou código de busca">
+                    </div>
+
+                    <div class="company-grid">
+                        <div class="field-group">
+                            <label for="companyName">Nome da empresa</label>
+                            <input id="companyName" type="text" placeholder="Preenchido pela API">
+                        </div>
+                        <div class="field-group">
+                            <label for="companyResponsible">Responsável</label>
+                            <input id="companyResponsible" type="text" placeholder="Preenchido pela API">
+                        </div>
+                        <div class="field-group">
+                            <label for="companyCity">Cidade</label>
+                            <input id="companyCity" type="text" placeholder="Preenchido pela API">
+                        </div>
+                        <div class="field-group">
+                            <label for="companyCnae">CNAE</label>
+                            <input id="companyCnae" type="text" placeholder="Preenchido pela API">
+                        </div>
+                        <div class="field-group field-full">
+                            <label for="companyEmail">E-mail</label>
+                            <input id="companyEmail" type="email" placeholder="Preenchido pela API">
+                        </div>
+                    </div>
+
+                    <div class="status-message" id="companyStatus"></div>
+                </div>
+
+                <div class="nav-buttons" style="gap: 0.75rem;">
+                    <button class="btn-back" onclick="prevStep(0)">Voltar</button>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
+                        <button class="btn-back" type="button" onclick="lookupCompany()">Buscar dados</button>
+                        <button class="btn-primary" id="companyContinueBtn" type="button" onclick="nextStep(2)" disabled>Continuar para o questionário</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q1 -->
+            <div class="step" id="step-2">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 1: ENTRADA (Input)</span>
+                    <h2 class="step-title">Qual é o tipo de matérias-primas predominantes (mais que 80%) do produto que você indicou?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(3)">O produto utiliza predominantemente matérias-primas virgens (extraídas diretamente da natureza).</button>
+                    <button class="option-btn" onclick="nextStep(3)">O produto utiliza predominantemente matérias-primas recicladas.</button>
+                    <button class="option-btn" onclick="nextStep(3)">O produto utiliza predominantemente matéria prima de aproveitamento de resíduos de outros processos produtivos.</button>
+                    <button class="option-btn" onclick="nextStep(3)">O produto utiliza predominantemente matéria prima provenientes de fontes renováveis.</button>
+                    <button class="option-btn" onclick="nextStep(3)">Não sei. Não aplicável. Não existe política definida sobre a origem, mas estamos a trabalhar para isso.</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(1)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="step" id="step-3">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 2: GESTÃO DE RESÍDUOS</span>
+                    <h2 class="step-title">Eliminação de resíduos da produção relativa ao produto que você indicou:</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(4)">A maioria (mais de 50%) dos resíduos são destinados para descarte em aterros sanitários.</button>
+                    <button class="option-btn" onclick="nextStep(4)">A maioria (mais de 50%) dos resíduos são destinados principalmente aos processos de reciclagem, reuso e reaproveitamento.</button>
+                    <button class="option-btn" onclick="nextStep(4)">A maioria (mais de 50%) dos resíduos são destinados a processos de produção de energia (Recuperação de energia).</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(2)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="step" id="step-4">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 3: SAÍDA DO PRODUTO (Fim de vida)</span>
+                    <h2 class="step-title">O produto que você indicou tem materiais que poderão ser desmontados ou reutilizados para facilitar o descarte adequado?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(5)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(5)">Não</button>
+                    <button class="option-btn" onclick="nextStep(5)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(3)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="step" id="step-5">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 3: SAÍDA DO PRODUTO (Fim de vida)</span>
+                    <h2 class="step-title">Os materiais dos quais o produto é realizado poderão ser utilizados principalmente a processo de reciclagem?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(6)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(6)">Não</button>
+                    <button class="option-btn" onclick="nextStep(6)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(4)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="step" id="step-6">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 3: SAÍDA DO PRODUTO (Fim de vida)</span>
+                    <h2 class="step-title">Os materiais dos quais o produto é realizado poderão ser destinados principalmente para descarte em aterros sanitários?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(7)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(7)">Não</button>
+                    <button class="option-btn" onclick="nextStep(7)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(5)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="step" id="step-7">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 3: SAÍDA DO PRODUTO (Fim de vida)</span>
+                    <h2 class="step-title">Os materiais dos quais o produto é realizado poderão ser utilizados principalmente aos processos de produção de energia (Recuperação de energia)?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(8)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(8)">Não</button>
+                    <button class="option-btn" onclick="nextStep(8)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(6)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="step" id="step-8">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 4: VIDA UTIL DO PRODUTO</span>
+                    <h2 class="step-title">Durabilidade: O produto que você indicou é testado e certificado por você ou seu fornecedor para seu desempenho, durabilidade ou Reparabilidade de acordo com os requisitos de norma?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(9)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(9)">Não</button>
+                    <button class="option-btn" onclick="nextStep(9)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(7)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="step" id="step-9">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 4: VIDA UTIL DO PRODUTO</span>
+                    <h2 class="step-title">O produto que você indicou tem, uma certificação relativa a rastreabilidade, impacto no meio ambiente ou similares?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(10)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(10)">Não</button>
+                    <button class="option-btn" onclick="nextStep(10)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(8)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q9 -->
+            <div class="step" id="step-10">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 4: VIDA UTIL DO PRODUTO</span>
+                    <h2 class="step-title">Logística reversa: A empresa dispõe de um serviço de logística reversa, com procedimentos específicos para a coleta, transporte e destinação final adequada dos resíduos do produto indicado?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(11)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(11)">Não</button>
+                    <button class="option-btn" onclick="nextStep(11)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(9)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="step" id="step-11">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 5: MONITORAMENTO E EXTENSÃO DO CICLO</span>
+                    <h2 class="step-title">O ciclo de vida do produto que você indicou é estendido através da prestação de serviços pós-venda adicionais (coleta de produtos usados para descarte ou reutilização, assistência, etc.) - Você tem serviço de pós-venda ?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(12)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(12)">Não</button>
+                    <button class="option-btn" onclick="nextStep(12)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(10)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q11 -->
+            <div class="step" id="step-12">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 5: MONITORAMENTO E EXTENSÃO DO CICLO</span>
+                    <h2 class="step-title">O ciclo de vida do produto que você indicou é rastreado através de sistemas tecnológicos e digitais (QR Code, Chip de Rastreamento, Passaporte Digital do Produto, etc.) - Você tem serviço e rastreamento ?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(13)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(13)">Não</button>
+                    <button class="option-btn" onclick="nextStep(13)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(11)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Q12 -->
+            <div class="step" id="step-13">
+                <div class="step-header">
+                    <span class="step-tag">Etapa 5: MONITORAMENTO E EXTENSÃO DO CICLO</span>
+                    <h2 class="step-title">A documentação e as informações do produto que você indicou (materiais utilizados, certificações obtidas, etc.) são facilmente disponíveis e fáceis de entender para o consumidor final?</h2>
+                </div>
+                <div class="options-list">
+                    <button class="option-btn" onclick="nextStep(14)">Sim</button>
+                    <button class="option-btn" onclick="nextStep(14)">Não</button>
+                    <button class="option-btn" onclick="nextStep(14)">Não sei</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-back" onclick="prevStep(12)">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="step" id="step-14">
+                <div class="report-shell visible">
+                    <div class="report-banner">
+                        <div>
+                            <p class="report-kicker">Relatório de Circularidade Empresarial</p>
+                            <h2 class="report-title" id="reportTitle">Gerando relatório...</h2>
+                            <p class="report-subtitle" id="reportSubtitle">As respostas estão sendo consolidadas e enviadas para o backend.</p>
+                        </div>
+                        <button class="btn-primary" style="margin-top: 0.25rem;" onclick="location.reload()">Nova avaliação</button>
+                    </div>
+
+                    <div class="report-status" id="reportStatus">Preparando análise final.</div>
+
+                    <div class="report-grid">
+                        <div class="report-card report-chart">
+                            <canvas id="igcChart" width="260" height="260" aria-label="Gráfico de IGC"></canvas>
+                            <div class="report-chart-label">
+                                <strong id="igcChartValue">0%</strong>
+                                <span id="igcChartLabel">Índice de Circularidade</span>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="report-metrics">
+                                <div class="metric-card">
+                                    <div class="label">Índice de Circularidade (IGC)</div>
+                                    <div class="value" id="metricIGC">0%</div>
+                                    <div class="hint" id="metricIGCHint">Visão geral da maturidade circular</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="label">Perfil de Circularidade de Materiais (PCM)</div>
+                                    <div class="value" id="metricPCM">0%</div>
+                                    <div class="hint">Foco em materiais, reaproveitamento e fim de vida</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="label">Total de Pontos</div>
+                                    <div class="value" id="metricTotal">0</div>
+                                    <div class="hint">Somatório bruto da avaliação</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="label">Média de Pontos</div>
+                                    <div class="value" id="metricAverage">0</div>
+                                    <div class="hint">Média por questão respondida</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-sections">
+                        <div class="report-card report-section">
+                            <h3>Leitura executiva</h3>
+                            <p id="reportSummary" class="report-subtitle" style="margin-top: 0;"></p>
+                            <p id="reportDetail" class="report-subtitle"></p>
+                        </div>
+                        <div class="report-card report-section">
+                            <h3>Pontos fortes</h3>
+                            <ul id="reportStrengths"></ul>
+                        </div>
+                        <div class="report-card report-section">
+                            <h3>Oportunidades</h3>
+                            <ul id="reportOpportunities"></ul>
+                        </div>
+                    </div>
+
+                    <div class="report-card report-section">
+                        <h3>Recomendações prioritárias</h3>
+                        <ul id="reportRecommendations"></ul>
+                        <div class="report-footer-note">
+                            O relatório é gerado com base nas respostas registradas neste diagnóstico e não substitui certificações formais ou validações técnicas específicas.
+                        </div>
+                    </div>
+
+                    <div class="report-card report-section" style="margin-top: 1rem;">
+                        <h3>Desempenho por estágio</h3>
+                        <div class="stage-list" id="stageList"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const totalQuestions = 12;
+        const API_BASE_URL = window.COSMOBRASIL_API_BASE_URL || '';
+        const NUMBER_FORMAT = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+
+        const QUESTION_CONFIG_BY_STEP = {
+            2: {
+                questionId: 'q1',
+                answerIds: ['virgin', 'recycled', 'byproduct', 'renewable', 'unknown'],
+                answers: {
+                    virgin: { label: 'Matérias-primas virgens', points: 0 },
+                    recycled: { label: 'Matérias-primas recicladas', points: 10 },
+                    byproduct: { label: 'Resíduos de outros processos', points: 8 },
+                    renewable: { label: 'Fontes renováveis', points: 7 },
+                    unknown: { label: 'Não sei / não aplicável', points: 5 }
+                }
+            },
+            3: {
+                questionId: 'q2',
+                answerIds: ['landfill', 'recycling', 'energy'],
+                answers: {
+                    landfill: { label: 'Descarte em aterro', points: 0 },
+                    recycling: { label: 'Reciclagem, reuso e reaproveitamento', points: 10 },
+                    energy: { label: 'Recuperação de energia', points: 6 }
+                }
+            },
+            4: { questionId: 'q3', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            5: { questionId: 'q4', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            6: { questionId: 'q5', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 0 }, no: { label: 'Não', points: 10 }, unknown: { label: 'Não sei', points: 5 } } },
+            7: { questionId: 'q6', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 6 }, no: { label: 'Não', points: 4 }, unknown: { label: 'Não sei', points: 5 } } },
+            8: { questionId: 'q7', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            9: { questionId: 'q8', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            10: { questionId: 'q9', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            11: { questionId: 'q10', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            12: { questionId: 'q11', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } },
+            13: { questionId: 'q12', answerIds: ['yes', 'no', 'unknown'], answers: { yes: { label: 'Sim', points: 10 }, no: { label: 'Não', points: 0 }, unknown: { label: 'Não sei', points: 5 } } }
+        };
+
+        const STAGE_LABELS = [
+            { key: 'input', label: 'Entrada (Input)' },
+            { key: 'output', label: 'Saída e gestão de resíduos' },
+            { key: 'lifecycle', label: 'Vida útil do produto' },
+            { key: 'monitoring', label: 'Monitoramento e extensão do ciclo' }
+        ];
+
+        const STAGE_QUESTIONS = {
+            input: ['q1'],
+            output: ['q2', 'q3', 'q4', 'q5', 'q6'],
+            lifecycle: ['q7', 'q8', 'q9'],
+            monitoring: ['q10', 'q11', 'q12']
+        };
+
+        const companyInputs = {
+            identifier: document.getElementById('companyIdentifier'),
+            name: document.getElementById('companyName'),
+            responsible: document.getElementById('companyResponsible'),
+            city: document.getElementById('companyCity'),
+            cnae: document.getElementById('companyCnae'),
+            email: document.getElementById('companyEmail')
+        };
+
+        const companyStatus = document.getElementById('companyStatus');
+        const companyContinueBtn = document.getElementById('companyContinueBtn');
+        const reportTitle = document.getElementById('reportTitle');
+        const reportSubtitle = document.getElementById('reportSubtitle');
+        const reportStatus = document.getElementById('reportStatus');
+        const reportSummary = document.getElementById('reportSummary');
+        const reportDetail = document.getElementById('reportDetail');
+        const reportStrengths = document.getElementById('reportStrengths');
+        const reportOpportunities = document.getElementById('reportOpportunities');
+        const reportRecommendations = document.getElementById('reportRecommendations');
+        const stageList = document.getElementById('stageList');
+        const metricIGC = document.getElementById('metricIGC');
+        const metricIGCHint = document.getElementById('metricIGCHint');
+        const metricPCM = document.getElementById('metricPCM');
+        const metricTotal = document.getElementById('metricTotal');
+        const metricAverage = document.getElementById('metricAverage');
+        const igcChart = document.getElementById('igcChart');
+        const igcChartValue = document.getElementById('igcChartValue');
+        const igcChartLabel = document.getElementById('igcChartLabel');
+
+        let companyData = {
+            identifier: '',
+            name: '',
+            responsible: '',
+            city: '',
+            cnae: '',
+            email: ''
+        };
+
+        let recordedAnswers = {};
+        let reportRequested = false;
+        let lastReport = null;
+
+        function setCompanyStatus(message, type = '') {
+            companyStatus.textContent = message;
+            companyStatus.className = 'status-message' + (type ? ` ${type}` : '');
+        }
+
+        function setReportStatus(message, type = '') {
+            reportStatus.textContent = message;
+            reportStatus.className = 'report-status' + (type ? ` ${type}` : '');
+        }
+
+        function fillCompanyFields(data) {
+            companyInputs.name.value = data?.name || '';
+            companyInputs.responsible.value = data?.responsible || '';
+            companyInputs.city.value = data?.city || '';
+            companyInputs.cnae.value = data?.cnae || '';
+            companyInputs.email.value = data?.email || '';
+        }
+
+        function validateCompanyForm() {
+            const hasRequiredFields =
+                companyInputs.identifier.value.trim() &&
+                companyInputs.name.value.trim() &&
+                companyInputs.responsible.value.trim() &&
+                companyInputs.city.value.trim() &&
+                companyInputs.cnae.value.trim() &&
+                companyInputs.email.value.trim();
+
+            companyContinueBtn.disabled = !hasRequiredFields;
+
+            if (hasRequiredFields) {
+                setCompanyStatus('Dados da empresa prontos.', 'success');
+            }
+        }
+
+        function recordAnswer(stepIndex, button) {
+            const question = QUESTION_CONFIG_BY_STEP[stepIndex];
+            if (!question) {
+                return;
+            }
+
+            const optionButtons = [...button.parentElement.querySelectorAll('.option-btn')];
+            const optionIndex = optionButtons.indexOf(button);
+            const answerId = question.answerIds[optionIndex];
+            const answerMeta = question.answers[answerId];
+
+            if (!answerMeta) {
+                return;
+            }
+
+            recordedAnswers[question.questionId] = {
+                questionId: question.questionId,
+                step: stepIndex,
+                answerId,
+                answerLabel: answerMeta.label,
+                points: answerMeta.points
+            };
+        }
+
+        function buildAnswerPayload() {
+            return Object.entries(QUESTION_CONFIG_BY_STEP)
+                .map(([step, question]) => {
+                    const answer = recordedAnswers[question.questionId];
+                    return answer ? answer : {
+                        questionId: question.questionId,
+                        step: Number(step),
+                        answerId: null,
+                        answerLabel: 'Sem resposta',
+                        points: 0
+                    };
+                })
+                .sort((a, b) => a.step - b.step);
+        }
+
+        function format(value) {
+            return NUMBER_FORMAT.format(Number(value || 0));
+        }
+
+        function getBand(score) {
+            if (score >= 85) return { label: 'Avançado', key: 'advanced' };
+            if (score >= 65) return { label: 'Bom', key: 'good' };
+            if (score >= 35) return { label: 'Moderado', key: 'moderate' };
+            return { label: 'Básico', key: 'basic' };
+        }
+
+        function calculateLocalReport() {
+            const answers = buildAnswerPayload();
+            const answerMap = new Map(answers.map((item) => [item.questionId, item]));
+
+            const detailedAnswers = Object.entries(QUESTION_CONFIG_BY_STEP).map(([step, question]) => {
+                const answer = answerMap.get(question.questionId);
+                return {
+                    questionId: question.questionId,
+                    step: Number(step),
+                    stageKey: getStageKeyByQuestion(question.questionId),
+                    stageLabel: getStageLabelByQuestion(question.questionId),
+                    answerId: answer?.answerId || null,
+                    answerLabel: answer?.answerLabel || 'Sem resposta',
+                    points: answer?.points || 0,
+                    maxPoints: 10
+                };
+            });
+
+            const totalPoints = detailedAnswers.reduce((sum, item) => sum + item.points, 0);
+            const averagePoints = detailedAnswers.length ? totalPoints / detailedAnswers.length : 0;
+            const igc = (totalPoints / (detailedAnswers.length * 10)) * 100;
+
+            const pcmQuestions = detailedAnswers.filter((item) => ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].includes(item.questionId));
+            const pcmTotal = pcmQuestions.reduce((sum, item) => sum + item.points, 0);
+            const pcm = (pcmTotal / (pcmQuestions.length * 10)) * 100;
+            const band = getBand(igc);
+
+            const stageScores = STAGE_LABELS.map((stage) => {
+                const stageQuestionIds = STAGE_QUESTIONS[stage.key];
+                const stageQuestions = detailedAnswers.filter((item) => stageQuestionIds.includes(item.questionId));
+                const stageTotal = stageQuestions.reduce((sum, item) => sum + item.points, 0);
+                const stageScore = (stageTotal / (stageQuestions.length * 10)) * 100;
+
+                return {
+                    stageKey: stage.key,
+                    label: stage.label,
+                    score: stageScore,
+                    rawPoints: stageTotal,
+                    maxPoints: stageQuestions.length * 10
+                };
+            });
+
+            const strongestStage = [...stageScores].sort((a, b) => b.score - a.score)[0];
+            const weakestStage = [...stageScores].sort((a, b) => a.score - b.score)[0];
+
+            const strengths = [];
+            const opportunities = [];
+            const recommendations = [];
+
+            if (strongestStage?.score >= 70) {
+                strengths.push(`Melhor desempenho em ${strongestStage.label.toLowerCase()}.`);
+            }
+            if (igc >= 80) {
+                strengths.push('Base madura de circularidade e rastreabilidade.');
+            } else if (igc >= 55) {
+                strengths.push('Boa base operacional, com margem clara para evolução.');
+            } else {
+                opportunities.push('Estruturar melhorias básicas para elevar a circularidade.');
+            }
+            if (weakestStage?.score < 65) {
+                opportunities.push(`Reforçar práticas em ${weakestStage.label.toLowerCase()}.`);
+            }
+            if (pcm < 60) {
+                opportunities.push('Melhorar a circularidade dos materiais na origem e no fim de vida.');
+            }
+            if ((STAGE_QUESTIONS.input && stageScores.find((stage) => stage.stageKey === 'input')?.score < 60)) {
+                recommendations.push('Aumentar a participação de matérias-primas recicladas, renováveis ou provenientes de reaproveitamento.');
+            }
+            if (stageScores.find((stage) => stage.stageKey === 'output')?.score < 60) {
+                recommendations.push('Projetar o produto para desmontagem, reciclabilidade e redução de descarte em aterro.');
+            }
+            if (stageScores.find((stage) => stage.stageKey === 'lifecycle')?.score < 60) {
+                recommendations.push('Fortalecer certificações, durabilidade e logística reversa.');
+            }
+            if (stageScores.find((stage) => stage.stageKey === 'monitoring')?.score < 60) {
+                recommendations.push('Melhorar rastreabilidade, pós-venda e documentação técnica.');
+            }
+            if (!recommendations.length) {
+                recommendations.push('Manter o padrão atual e aprofundar a rastreabilidade dos dados para monitoramento contínuo.');
+            }
+
+            return {
+                company: companyData,
+                igc,
+                pcm,
+                totalPoints,
+                averagePoints,
+                band,
+                summary: `${companyData.name || 'A empresa'} alcançou IGC de ${format(igc)}% (${band.label}).`,
+                detail: pcm >= igc
+                    ? 'O perfil de circularidade de materiais está acima ou igual ao índice geral, indicando boa base material.'
+                    : 'O perfil de circularidade de materiais está abaixo do índice geral, sinalizando gargalos na base de materiais.',
+                strengths,
+                opportunities,
+                recommendations,
+                stageScores,
+                answers: detailedAnswers
+            };
+        }
+
+        function getStageKeyByQuestion(questionId) {
+            if (questionId === 'q1') return 'input';
+            if (['q2', 'q3', 'q4', 'q5', 'q6'].includes(questionId)) return 'output';
+            if (['q7', 'q8', 'q9'].includes(questionId)) return 'lifecycle';
+            return 'monitoring';
+        }
+
+        function getStageLabelByQuestion(questionId) {
+            const stageKey = getStageKeyByQuestion(questionId);
+            return STAGE_LABELS.find((stage) => stage.key === stageKey)?.label || stageKey;
+        }
+
+        function clearNode(node) {
+            while (node.firstChild) {
+                node.removeChild(node.firstChild);
+            }
+        }
+
+        function appendListItems(node, items, emptyMessage) {
+            clearNode(node);
+
+            if (!items.length) {
+                const li = document.createElement('li');
+                li.textContent = emptyMessage;
+                node.appendChild(li);
+                return;
+            }
+
+            items.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                node.appendChild(li);
+            });
+        }
+
+        function drawDoughnut(value) {
+            const canvas = igcChart;
+            const ctx = canvas.getContext('2d');
+            const size = 260;
+            const center = size / 2;
+            const radius = 88;
+            const thickness = 20;
+
+            canvas.width = size;
+            canvas.height = size;
+            ctx.clearRect(0, 0, size, size);
+
+            const background = ctx.createLinearGradient(0, 0, size, size);
+            background.addColorStop(0, 'rgba(255,255,255,0.08)');
+            background.addColorStop(1, 'rgba(255,255,255,0.03)');
+
+            ctx.lineWidth = thickness;
+            ctx.strokeStyle = background;
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const bandColor = value >= 85 ? '#16a34a' : value >= 65 ? '#38bdf8' : value >= 35 ? '#f59e0b' : '#ef4444';
+            const arcGradient = ctx.createLinearGradient(35, 35, 225, 225);
+            arcGradient.addColorStop(0, '#3B82F6');
+            arcGradient.addColorStop(1, bandColor);
+
+            ctx.beginPath();
+            ctx.strokeStyle = arcGradient;
+            ctx.lineCap = 'round';
+            ctx.arc(center, center, radius, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * (Math.max(0, Math.min(100, value)) / 100)));
+            ctx.stroke();
+
+            ctx.fillStyle = '#020617';
+            ctx.beginPath();
+            ctx.arc(center, center, radius - thickness / 2 - 1, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '700 34px "Plus Jakarta Sans", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${format(value)}%`, center, center - 8);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '500 12px "Geist", sans-serif';
+            ctx.fillText('IGC', center, center + 20);
+        }
+
+        function renderReport(report, sourceLabel) {
+            lastReport = report;
+            reportRequested = true;
+
+            const companyLabel = report.company?.name || report.company?.nome || 'Empresa analisada';
+            reportTitle.textContent = companyLabel;
+            reportSubtitle.textContent = `Relatório de Circularidade Empresarial gerado para ${report.company?.identifier || companyData.identifier || 'o cadastro informado'} via ${sourceLabel}.`;
+            setReportStatus(`Relatório gerado com sucesso${sourceLabel ? ` - ${sourceLabel}` : ''}.`, 'success');
+
+            metricIGC.textContent = `${format(report.igc)}%`;
+            metricIGCHint.textContent = `${report.band.label} - visão geral da maturidade circular`;
+            metricPCM.textContent = `${format(report.pcm)}%`;
+            metricTotal.textContent = format(report.totalPoints);
+            metricAverage.textContent = format(report.averagePoints);
+            igcChartValue.textContent = `${format(report.igc)}%`;
+            igcChartLabel.textContent = `Índice de Circularidade - ${report.band.label}`;
+
+            reportSummary.textContent = report.summary;
+            reportDetail.textContent = report.detail;
+            appendListItems(reportStrengths, report.strengths || [], 'Nenhum destaque registrado.');
+            appendListItems(reportOpportunities, report.opportunities || [], 'Nenhuma oportunidade registrada.');
+            appendListItems(reportRecommendations, report.recommendations || [], 'Nenhuma recomendação registrada.');
+
+            clearNode(stageList);
+            (report.stageScores || []).forEach((stage) => {
+                const item = document.createElement('div');
+                item.className = 'stage-item';
+                item.innerHTML = `
+                    <div class="stage-name">${stage.label}</div>
+                    <div class="stage-score">${format(stage.score)}%</div>
+                    <div class="stage-meta">${format(stage.rawPoints)} de ${format(stage.maxPoints)} pontos</div>
+                `;
+                stageList.appendChild(item);
+            });
+
+            drawDoughnut(report.igc);
+        }
+
+        function renderFallbackReport(message) {
+            const report = calculateLocalReport();
+            renderReport(report, 'processamento local');
+            setReportStatus(message, 'error');
+        }
+
+        async function lookupCompany() {
+            const identifier = companyInputs.identifier.value.trim();
+            companyData.identifier = identifier;
+
+            if (!identifier) {
+                setCompanyStatus('Informe um CNPJ ou identificador para buscar os dados da empresa.', 'error');
+                validateCompanyForm();
+                return;
+            }
+
+            if (!API_BASE_URL) {
+                setCompanyStatus('Modo manual ativo. Preencha os campos da empresa para continuar.', 'error');
+                validateCompanyForm();
+                return;
+            }
+
+            setCompanyStatus('Buscando dados da empresa...', '');
+            companyContinueBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/company/lookup?documento=${encodeURIComponent(identifier)}`, {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    let backendMessage = `Resposta inválida da API (${response.status})`;
+                    try {
+                        const errorBody = await response.json();
+                        backendMessage = errorBody?.message || errorBody?.error || backendMessage;
+                        if (errorBody?.hint) {
+                            backendMessage = `${backendMessage} ${errorBody.hint}`;
+                        }
+                    } catch (_parseError) {
+                        // Keep the generic status message if the body is not JSON.
+                    }
+                    throw new Error(backendMessage);
+                }
+
+                const data = await response.json();
+                companyData = {
+                    identifier,
+                    name: data?.nome || '',
+                    responsible: data?.responsavel || '',
+                    city: data?.cidade || '',
+                    cnae: data?.cnae || '',
+                    email: data?.email || ''
+                };
+
+                fillCompanyFields(companyData);
+                setCompanyStatus('Dados carregados com sucesso.', 'success');
+                validateCompanyForm();
+            } catch (error) {
+                console.error(error);
+                setCompanyStatus(error.message || 'Não foi possível consultar a API da empresaqui. Você pode preencher os campos manualmente para continuar.', 'error');
+                validateCompanyForm();
+            }
+        }
+
+        async function submitAssessment() {
+            if (reportRequested) {
+                return;
+            }
+
+            reportRequested = true;
+            setReportStatus('Consolidando respostas e calculando índices...');
+
+            const payload = {
+                company: companyData,
+                answers: buildAnswerPayload()
+            };
+
+            if (!API_BASE_URL) {
+                renderFallbackReport('Backend indisponível no momento. Resultado calculado localmente.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/assessments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Falha ao gerar relatório (${response.status})`);
+                }
+
+                const data = await response.json();
+                renderReport(data.report, data.assessmentId ? 'backend Railway + PostgreSQL' : 'backend');
+            } catch (error) {
+                console.error(error);
+                renderFallbackReport('Backend indisponível ou token/URL não configurados. O relatório foi calculado localmente como fallback.');
+            }
+        }
+
+        function nextStep(stepIndex) {
+            document.querySelectorAll('.step').forEach((el) => {
+                el.classList.remove('active');
+            });
+
+            setTimeout(() => {
+                const target = document.getElementById(`step-${stepIndex}`);
+                if (target) {
+                    target.classList.add('active');
+                }
+                updateProgress(stepIndex);
+
+                if (stepIndex === 14) {
+                    submitAssessment();
+                }
+            }, 50);
+        }
+
+        function prevStep(stepIndex) {
+            nextStep(stepIndex);
+        }
+
+        function updateProgress(stepIndex) {
+            const progressContainer = document.getElementById('progress-container');
+            const progressText = document.getElementById('progress-text');
+            const progressBar = document.getElementById('progress-bar');
+
+            const questionIndex = stepIndex - 1;
+
+            if (stepIndex < 2 || stepIndex > 13) {
+                progressContainer.style.display = 'none';
+                progressText.style.display = 'none';
+            } else {
+                progressContainer.style.display = 'block';
+                progressText.style.display = 'block';
+
+                const percentage = ((questionIndex - 1) / totalQuestions) * 100;
+                progressBar.style.width = percentage + '%';
+                progressText.textContent = `Questão ${questionIndex} de ${totalQuestions}`;
+            }
+        }
+
+        document.querySelectorAll('.option-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                const stepEl = button.closest('.step');
+                if (!stepEl) {
+                    return;
+                }
+
+                const stepIndex = Number(stepEl.id.replace('step-', ''));
+                recordAnswer(stepIndex, button);
+            });
+        });
+
+        companyInputs.identifier.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                lookupCompany();
+            }
+        });
+
+        Object.values(companyInputs).forEach((input) => {
+            input.addEventListener('input', () => {
+                companyData.identifier = companyInputs.identifier.value.trim();
+                companyData.name = companyInputs.name.value.trim();
+                companyData.responsible = companyInputs.responsible.value.trim();
+                companyData.city = companyInputs.city.value.trim();
+                companyData.cnae = companyInputs.cnae.value.trim();
+                companyData.email = companyInputs.email.value.trim();
+                validateCompanyForm();
+            });
+        });
+
+        validateCompanyForm();
+    </script>
+</body>
+</html>
